@@ -4,6 +4,7 @@ author: "Charles Lang"
 date: "November 9, 2016"
 output: html_document
 ---
+
 For this assignment we will be using data from the Assistments Intelligent Tutoring system. This system gives students hints based on how they perform on math problems. 
 
 #Install & call libraries
@@ -16,7 +17,7 @@ library(party)
 
 ## Part I
 ```{r}
-D1 <- 
+D1 <- read.csv("intelligent_tutor.csv")
 ```
 
 ##Classification Tree
@@ -51,6 +52,7 @@ D1$advice <- ifelse(D1$score <=0.4, "intervene", ifelse(D1$score > 0.4 & D1$scor
 #Build a decision tree that predicts "advice" based on how many problems students have answered before, the percentage of those problems they got correct and how many hints they required
 ```{r}
 score_ctree <- ctree(factor(advice) ~ prior_prob_count + prior_percent_correct + hints, D1)
+#score_ctree <- ctree(factor(advice) ~ ., D1)
 ```
 
 #Plot tree
@@ -58,20 +60,29 @@ score_ctree <- ctree(factor(advice) ~ prior_prob_count + prior_percent_correct +
 plot(score_ctree)
 ```
 
-Please interpret the tree, which two behaviors do you think the teacher should most closely pay attemtion to?
+##Please interpret the tree, which two behaviors do you think the teacher should most closely pay attemtion to?
+Students who asked for more than 12 hints, or students who asked for asked for some hints (but less than 12) and got less than 63% correct in their prior score.
 
 #Test Tree
-Upload the data "intelligent_tutor_new.csv". This is a data set of a differnt sample of students doing the same problems in the same system. We can use the tree we built for the previous data set to try to predict the "advice" we should give the teacher about these new students. 
+Upload the data "intelligent_tutor_new.csv". This is a data set of a different sample of students doing the same problems in the same system. We can use the tree we built for the previous data set to try to predict the "advice" we should give the teacher about these new students. 
 
 ```{r}
 #Upload new data
 
-D2 <- 
+D2 <- read.csv("intelligent_tutor_new.csv")
 
 #Generate predicted advice for new students based on tree generated from old students
 
 D2$prediction <- predict(score_ctree, D2)
-
+D2$hint.y <- with(D2, ifelse(hints > 0, 0, 1))
+table(D2$prediction)
 ``` 
+
+Based on the previous tree, the teachers should monitor 84 situations, intervene in none and take no action in 116
+
+
 ## Part III
 Compare the predicted advice with the actual advice that these studnts recieved. What is the difference between the observed and predicted results?
+
+The score is the actual scores students received.  All students receive all answers correctly, so in this particular case, the model suggest that teachers monitor 84 cases where there is no need to take an action (because they actually received 100%).
+
